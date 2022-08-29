@@ -19,6 +19,7 @@ jobs:
         pip install httpx && python manage_app.py
       env:
         RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        APP_NAME: ${{ secrets.APP_NAME }}
         ENABLE_DUO: ${{ env.ENABLE_DUO }}
         DUO_IKEY: ${{ secrets.DUO_IKEY }}
         DUO_SKEY: ${{ secrets.DUO_SKEY }}
