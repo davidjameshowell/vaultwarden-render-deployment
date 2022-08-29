@@ -4,41 +4,29 @@ on:
   workflow_dispatch:
 
 env:
-  AUTOBUS_ENABLE: 1
-  CREATE_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-  DUO_ENABLE: 1
-  GIT_HASH: main
-  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-  USE_PSQL: 0
-  HEROKU_VERIFIED: 1
-  OFFSITE_HEROKU_DB: ${{ secrets.OFFSITE_HEROKU_DB }}
-  HEROKU_CREATE_OPTIONS: ${{ secrets.HEROKU_CREATE_OPTIONS }}
+  ENABLE_DUO: "true"
+  SMTP_SECURITY: ""
 
 jobs:
-  create_and_deploy_vaultwarden:
+  update_and_deploy_vaultwarden:
     name: Create Vaultwarden App
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Add Render env vars
+    - name: Run Vaultwarden-Render Manage Script
       run: |
-        ADMIN_TOKEN="$(openssl rand -base64 48)"
-        MYSQL_URI=${{ secrets.MYSQL_DATABSE_URI }}
-        DUO_HOST=${{ secrets.DUO_HOST }}
+        python manage_app.py
+      env:
+        RENDER_API_KEY=${{ secrets.RENDER_API_KEY }}
+        ENABLE_DUO=${{ env.ENABLE_DUO }}
         DUO_IKEY=${{ secrets.DUO_IKEY }}
         DUO_SKEY=${{ secrets.DUO_SKEY }}
-        I_REALLY_WANT_VOLATILE_STORAGE="true"
-        SMTP  
-
-
-    - uses: docker-practice/actions-setup-docker@master
-      with:
-        docker_channel: stable
-        # this value please see https://github.com/AkihiroSuda/moby-snapshot/releases
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-    - run: curl https://cli-assets.heroku.com/install.sh | sh
-    - run: sudo apt update && sudo apt install jq openssl -y
-    - run: bash vaultwarden_heroku.sh -a $CREATE_APP_NAME -d $DUO_ENABLE -g $GIT_HASH -p $USE_PSQL -v $HEROKU_VERIFIED -u ${OFFSITE_HEROKU_DB:-' '} -b $AUTOBUS_ENABLE -t deploy
+        DUO_HOST=${{ secrets.DUO_HOST }}
+        DATABASE_URL=${{ secrets.DATABASE_URL }}
+        SMTP_HOST=${{ secrets.SMTP_HOST }}
+        SMTP_FROM=${{ secrets.SMTP_FROM }}
+        SMTP_PORT=${{ secrets.SMTP_PORT }}
+        SMTP_SECURITY=${{ env.SMTP_SECURITY }}
+        SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
+        SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
