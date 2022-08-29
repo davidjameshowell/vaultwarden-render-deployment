@@ -1,0 +1,44 @@
+name: VaultwardenOnRender_Deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  AUTOBUS_ENABLE: 1
+  CREATE_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+  DUO_ENABLE: 1
+  GIT_HASH: main
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+  USE_PSQL: 0
+  HEROKU_VERIFIED: 1
+  OFFSITE_HEROKU_DB: ${{ secrets.OFFSITE_HEROKU_DB }}
+  HEROKU_CREATE_OPTIONS: ${{ secrets.HEROKU_CREATE_OPTIONS }}
+
+jobs:
+  create_and_deploy_vaultwarden:
+    name: Create Vaultwarden App
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Add Render env vars
+      run: |
+        ADMIN_TOKEN="$(openssl rand -base64 48)"
+        MYSQL_URI=${{ secrets.MYSQL_DATABSE_URI }}
+        DUO_HOST=${{ secrets.DUO_HOST }}
+        DUO_IKEY=${{ secrets.DUO_IKEY }}
+        DUO_SKEY=${{ secrets.DUO_SKEY }}
+        I_REALLY_WANT_VOLATILE_STORAGE="true"
+        SMTP  
+
+
+    - uses: docker-practice/actions-setup-docker@master
+      with:
+        docker_channel: stable
+        # this value please see https://github.com/AkihiroSuda/moby-snapshot/releases
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - run: curl https://cli-assets.heroku.com/install.sh | sh
+    - run: sudo apt update && sudo apt install jq openssl -y
+    - run: bash vaultwarden_heroku.sh -a $CREATE_APP_NAME -d $DUO_ENABLE -g $GIT_HASH -p $USE_PSQL -v $HEROKU_VERIFIED -u ${OFFSITE_HEROKU_DB:-' '} -b $AUTOBUS_ENABLE -t deploy
