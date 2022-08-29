@@ -15,7 +15,6 @@ def get_service_id_and_slug(appName):
            return {"service_id": service["service"]["id"], "slug": service["service"]["slug"]}
 
 def update_or_add_envars(serviceId, envVars):
-    print(envVars)
     update_env_vars = httpx.put(url="https://api.render.com/v1/services/{service_id}/env-vars".format(service_id=serviceId), headers={"Authorization": f"Bearer {os.environ['RENDER_API_KEY']}"}, json=envVars)
     return update_env_vars.json()
 
@@ -64,7 +63,7 @@ def build_env_vars(appName, serviceSlug):
 
 def kickoff_build(serviceId):
     build = httpx.post(url="https://api.render.com/v1/services/{service_id}/deploys".format(service_id=serviceId), headers={"Authorization": f"Bearer {os.environ['RENDER_API_KEY']}"}, json={"clearCache": "clear"})
-    return print(build.json())
+    return build.json()
 
 appName = os.environ["APP_NAME"]
 serviceDetails = get_service_id_and_slug(appName)
